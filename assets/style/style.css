@@ -1,0 +1,368 @@
+:root {
+  --bg: #081017;
+  --button: #5B3ECA;
+  --grey: #D3D4D6;
+  --white: #fff;
+  --purple: #604FAD;
+  --green: #3F924D;
+  --card: #0B141C;
+  --border: #090F14;
+  --hover-btn: #181734;
+  --icon: #1F1C42;
+}
+
+.stApp {
+  background-color: var(--bg);
+  color: var(--white);
+}
+
+section[data-testid="stSidebar"] {
+  background-color: #0d1320;
+}
+
+.metric-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 10px;
+}
+.metric-title {
+  color: #9ca3af;
+  font-size: 14px;
+}
+.metric-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+}
+.metric-growth {
+  color: #22c55e;
+}
+
+.nav-btn {
+  margin-bottom: 16px;
+}
+
+.nav-btn, button[data-testid="stBaseButton-secondary"] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-align: center;
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--grey);
+  font-weight: 500;
+}
+
+.nav-btn.active {
+  background: var(--hover-btn);
+  color: var(--white);
+  border: 1px solid var(--hover-btn);
+}
+
+.nav-btn:hover {
+  border: 1px solid var(--hover-btn);
+  cursor: pointer;
+}
+
+section[data-testid="stFileUploaderDropzone"] {
+  background: #0B141D;
+  padding: 0;
+  text-align: center;
+}
+
+
+section[data-testid="stVerticalBlock"]:has([data-testid="stFileUploader"]) {
+  background-color: #0B141D;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+[data-testid="stFileUploader"] [data-testid="stBaseButton-secondary"]{
+  background-color: var(--button);
+  width: 100%;
+}
+
+.st-key-run_analysis button {
+  border: 1px solid var(--purple);
+  color: var(--purple);
+}
+
+.view-full-table-wrapper button {
+  background-color: var(--button);
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+  color: white;
+  font-weight: 500;
+}
+
+div[data-testid="stElementContainer"]:has(.stDownloadButton button) {
+  width: 100%;
+}
+
+.stDownloadButton button {
+  background-color: var(--button);
+  width: 100%;
+}
+
+.stDownloadButton button:hover {
+  background: var(--purple);
+  color: white;
+}
+  
+/* cards */
+
+.metric-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center ;
+  /* justify-content: space-between; */
+  gap: 10px;
+  padding: 10px;
+}
+
+.metric-left {
+
+}
+
+.metric-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background-color: var(--icon);
+}
+
+.metric-right {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-title, .metric-date{
+  font-size: 14px;
+  color: var(--grey);
+}
+
+.metric-value {
+  font-size: 18px;
+  color: var(--white);
+}
+.metric-growth{
+  color: var(--green);
+  font-size: 12px;
+}
+
+[data-testid="stPlotlyChart"] {
+  border: 1px solid #374151;
+  border-radius: 12px;
+  background: #111827;
+  overflow: hidden;
+}
+
+
+/* severity-card */
+
+.severity-card {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 24px;
+  border-radius: 16px;
+  min-height: 180px;
+}
+
+.severity-high {
+  border: 2px solid #EF4444;
+  background: rgba(239,68,68,.08);
+}
+
+.severity-medium {
+  border: 2px solid #F59E0B;
+  background: rgba(245,158,11,.08);
+}
+
+.severity-low {
+  border: 2px solid #22C55E;
+  background: rgba(34,197,94,.08);
+}
+
+.severity-bar{
+  width:100%;
+  height:10px;
+  background:#1f2937;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:12px;
+}
+
+.severity-fill{
+  height: 100%;
+  border-radius: 999px;
+}
+
+.severity-fill.high{
+  background:#ef4444;
+}
+
+.severity-fill.medium{
+  background:#f59e0b;
+}
+
+.severity-fill.low{
+  background:#22c55e;
+}
+
+/* district */
+
+.district-card {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  padding: 20px;
+  min-height: 280px;
+}
+
+.district-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.district-rank {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    #ef4444,
+    #f97316
+  );
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 700;
+  font-size: 18px;
+  color: white;
+}
+
+.district-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+}
+
+.district-count {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.district-severity {
+  display: inline-block;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.district-problems-title {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.district-problems {
+  margin: 0;
+  padding-left: 20px;
+  color: #d1d5db;
+}
+
+.district-problems li {
+  margin-bottom: 6px;
+}
+
+/* Таблица */
+
+.essence-card{
+  background:#111827;
+  border:1px solid #374151;
+  border-radius:18px;
+  padding:24px;
+  margin-top:20px;
+}
+
+.essence-title{
+  font-size:24px;
+  font-weight:700;
+  color:white;
+  margin-bottom:20px;
+}
+
+.essence-table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.essence-table th{
+  background:#1F2937;
+  text-align:left;
+  padding:14px;
+  color:white;
+}
+
+.essence-table td{
+  padding:14px;
+  border-top:1px solid #374151;
+  color:#D1D5DB;
+}
+
+.problem-red{
+  color:#EF4444;
+  font-weight:700;
+}
+
+.problem-green{
+  color:#22C55E;
+  font-weight:700;
+}
+
+@media screen and (max-width: 1024px) {
+  .metric-card {
+    flex-direction: column;
+  }
+}
+
+
+/* Стили для сортируемых заголовков */
+.essence-table th {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.essence-table th:hover {
+    background-color: #374151 !important;
+}
+
+.sort-icon {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 12px;
+    transition: opacity 0.2s;
+}
+
+/* Анимация при сортировке */
+.essence-table tbody tr {
+    transition: all 0.2s;
+}
