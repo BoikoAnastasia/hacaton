@@ -1,0 +1,14 @@
+# PyTorch с CUDA — ставится отдельно (см. setup.ps1 и README).
+accelerate>=1.13.0
+bitsandbytes>=0.49.0
+huggingface_hub>=0.34.0
+numpy>=2.0
+openpyxl>=3.1.0
+pandas>=2.0
+plotly>=6.0
+python-docx>=1.0
+scikit-learn>=1.5
+sentence-transformers>=3.0
+streamlit>=1.58
+transformers>=4.46
+xlsxwriter>=3.2

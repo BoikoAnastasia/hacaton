@@ -3,10 +3,10 @@ import html
 import pandas as pd
 
 from utils.cleaner import clean
+from utils.problem import filter_problems
 
 def create_table(df, limit=None, show_full_table_button=False):
-    # Оставляем только проблемные обращения
-    df = df[df["Проблема"] == True]
+    df = filter_problems(df)
 
     # Сортируем по серьёзности
     df = df.sort_values(by="Серьёзность", ascending=False)

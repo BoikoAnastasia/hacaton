@@ -1,15 +1,17 @@
 import numpy as np
 import pandas as pd
 
+from utils.problem import is_problem
+
+
 def get_kpi_metrics(df):
 
     total = len(df)
 
-    # проблемные (пример логики)
     if "Проблема" in df.columns:
-        problem_count = df["Проблема"].sum()
+        problem_count = int(df["Проблема"].apply(is_problem).sum())
     else:
-        problem_count = total  # fallback
+        problem_count = total
 
     municipalities = df["Муниципалитет"].nunique()
 

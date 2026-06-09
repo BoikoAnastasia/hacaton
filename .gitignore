@@ -1,1 +1,32 @@
+# Python
+.venv/
+qwen_env/
 **/__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Streamlit / IDE
+.streamlit/secrets.toml
+.idea/
+.vscode/
+
+# Сгенерированные данные (не коммитить)
+dashboard/data/uploads/*
+!dashboard/data/uploads/.gitkeep
+dashboard/data/reports/*
+!dashboard/data/reports/.gitkeep
+storage/output/**
+!storage/output/.gitkeep
+
+# Большие Excel (тестовый файл — см. storage/samples/README.txt)
+storage/samples/*
+!storage/samples/.gitkeep
+!storage/samples/README.txt
+
+# Случайные копии данных в коде
+analyze/*.xlsx
+
+# Модели Hugging Face (скачиваются локально)
+models/
+.cache/

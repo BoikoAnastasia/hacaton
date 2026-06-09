@@ -14,11 +14,11 @@ from core.data_loader import load_main_df
 def render_main():
     df = load_main_df()
 
+    empty = {"count": 0, "percent": 0}
     kpi = None
-    severity = None;
-    high = None;
-    medium = None;
-    low = None;
+    high = empty.copy()
+    medium = empty.copy()
+    low = empty.copy()
 
     if df is not None:
         kpi = get_kpi_metrics(df)
@@ -35,7 +35,8 @@ def render_main():
     if kpi is not None:
         render_kpi_cards(kpi)
     else:
-        st.warning("KPI не рассчитан")
+        st.warning("Загрузите файл в боковой панели и нажмите «Запустить анализ».")
+        return
 
     st.subheader("Распределение по степени тяжести")
 
