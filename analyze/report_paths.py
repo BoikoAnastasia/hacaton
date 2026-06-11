@@ -42,5 +42,6 @@ def report_files(report_dir: Path) -> dict[str, Path]:
         "cleaned": report_dir / "cleaned.xlsx",
         "result": report_dir / "result.xlsx",
         "report": report_dir / "report.xlsx",
-        "summary": report_dir / "report.txt",
+        "summary": report_dir / "report.pdf",
+        "cleaning_stats": report_dir / "cleaning_stats.json",
     }

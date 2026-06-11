@@ -19,6 +19,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 from columns import COL_PROBLEM, normalize_analysis_columns
 from location_utils import make_district_key
+from pdf_report import generate_pdf_from_report_xlsx
 
 MODEL_NAME = "Qwen/Qwen2.5-7B-Instruct"
 json_regex = re.compile(r"\{[^{}]*\}", re.DOTALL)
@@ -118,14 +119,10 @@ def main():
         all_districts.to_excel(writer, sheet_name="Все районы", index=False)
         overview.to_excel(writer, sheet_name="Обзор", index=False)
 
-    summary_path = Path(output).with_suffix(".txt")
-    if summary_path.exists():
-        extra = "\n\nОПИСАНИЯ LLM:\n" + "\n".join(
-            f"- {row['район']}: {desc}" for row, desc in zip(top_df.head(args.top).to_dict("records"), descriptions)
-        )
-        summary_path.write_text(summary_path.read_text(encoding="utf-8") + extra, encoding="utf-8")
-
+    pdf_path = Path(output).with_suffix(".pdf")
+    generate_pdf_from_report_xlsx(output, pdf_path)
     print(f"Обновлён: {output}")
+    print(f"PDF-справка: {pdf_path}")
 
 
 if __name__ == "__main__":

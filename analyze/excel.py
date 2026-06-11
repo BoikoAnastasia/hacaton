@@ -1,7 +1,10 @@
 import argparse
+from pathlib import Path
+
 import pandas as pd
 import re
 
+from cleaning_stats import save_cleaning_stats
 from columns import CLEANED_COLUMNS, select_columns
 
 # ==========================================
@@ -103,28 +106,53 @@ def preprocess(input_file, output_file):
     if OUTCOME_COLUMN not in df.columns:
         raise KeyError(f"Колонка '{OUTCOME_COLUMN}' не найдена: {list(df.columns)}")
 
+    types_in_file = (
+        df[TYPE_COLUMN].fillna("не указан").astype(str).value_counts().to_dict()
+    )
+    outcomes_in_file = (
+        df[OUTCOME_COLUMN].fillna("не указан").astype(str).value_counts().to_dict()
+    )
+
     print("Очистка текста...")
     df["Очищенный текст"] = df[TEXT_COLUMN].apply(clean_text)
 
     before = len(df)
     df = df[df["Очищенный текст"] != ""]
-    print(f"Удалено пустых: {before - len(df)}")
+    removed_empty = before - len(df)
+    print(f"Удалено пустых: {removed_empty}")
 
     before = len(df)
     df = df[df[TYPE_COLUMN].isin(VALID_TYPES)]
-    print(f"Удалено по типу (оставлен только «Решаемый»): {before - len(df)}")
+    removed_by_type = before - len(df)
+    print(f"Удалено по типу (оставлен только «Решаемый»): {removed_by_type}")
     print(df[TYPE_COLUMN].value_counts())
 
     before = len(df)
     df = df[df[OUTCOME_COLUMN].apply(is_open_outcome)]
-    print(f"Удалено по итогу (закрытые обращения): {before - len(df)}")
+    removed_by_outcome = before - len(df)
+    print(f"Удалено по итогу (закрытые обращения): {removed_by_outcome}")
     print(df[OUTCOME_COLUMN].value_counts(dropna=False))
 
     before = len(df)
     df = df.drop_duplicates(subset=["Очищенный текст"])
-    print(f"Удалено дублей: {before - len(df)}")
+    removed_duplicates = before - len(df)
+    print(f"Удалено дублей: {removed_duplicates}")
 
     df = select_columns(df, CLEANED_COLUMNS)
+
+    stats = {
+        "total_input": start_count,
+        "total_after_clean": len(df),
+        "removed_empty": removed_empty,
+        "removed_by_type": removed_by_type,
+        "removed_by_outcome": removed_by_outcome,
+        "removed_duplicates": removed_duplicates,
+        "types_in_file": types_in_file,
+        "outcomes_in_file": outcomes_in_file,
+    }
+    stats_path = Path(output_file).with_name("cleaning_stats.json")
+    save_cleaning_stats(stats, stats_path)
+    print(f"Статистика очистки: {stats_path}")
 
     df.to_excel(output_file, index=False)
     print(f"Сохранено: {output_file} ({len(df)} строк из {start_count})")

@@ -1,27 +1,33 @@
 import numpy as np
 import pandas as pd
 
+from utils.location import make_district_key
 from utils.problem import is_problem
 
 
-def get_kpi_metrics(df):
-
-    total = len(df)
+def get_kpi_metrics(df, cleaning_stats: dict | None = None):
+    analyzed = len(df)
+    total_input = cleaning_stats["total_input"] if cleaning_stats else analyzed
 
     if "Проблема" in df.columns:
-        problem_count = int(df["Проблема"].apply(is_problem).sum())
+        problems = df[df["Проблема"].apply(is_problem)]
+        problem_count = len(problems)
+        districts_with_problems = (
+            int(problems.apply(make_district_key, axis=1).nunique()) if len(problems) else 0
+        )
     else:
-        problem_count = total
+        problem_count = analyzed
+        districts_with_problems = 0
 
-    municipalities = df["Муниципалитет"].nunique()
-
-    avg_severity = df["Серьёзность"].mean()
+    avg_severity = round(df["Серьёзность"].mean(), 2) if "Серьёзность" in df.columns else 0.0
 
     return {
-        "total": total,
+        "total": total_input,
+        "analyzed": analyzed,
         "problem_count": problem_count,
-        "municipalities": municipalities,
-        "avg_severity": round(avg_severity, 2)
+        "districts_with_problems": districts_with_problems,
+        "avg_severity": avg_severity,
+        "cleaning_stats": cleaning_stats,
     }
 
 def get_severity_stats(df):

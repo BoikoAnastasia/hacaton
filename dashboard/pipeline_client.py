@@ -31,6 +31,7 @@ class AnalysisResult:
     report: Path | None
     summary: Path | None
     log: str
+    cleaning_stats: Path | None = None
     error: str | None = None
     preset: str = DEFAULT_PRESET
 
@@ -59,8 +60,9 @@ def publish_to_dashboard(result: AnalysisResult) -> None:
     for src, name in (
         (result.result, "result.xlsx"),
         (result.report, "report.xlsx"),
-        (result.summary, "report.txt"),
+        (result.summary, "report.pdf"),
         (result.cleaned, "cleaned.xlsx"),
+        (result.cleaning_stats, "cleaning_stats.json"),
     ):
         if src and Path(src).exists():
             shutil.copy2(src, REPORTS_DIR / name)
@@ -102,6 +104,7 @@ def _failure(
         result=paths["result"] if paths["result"].exists() else None,
         report=paths["report"] if paths["report"].exists() else None,
         summary=paths["summary"] if paths["summary"].exists() else None,
+        cleaning_stats=paths["cleaning_stats"] if paths["cleaning_stats"].exists() else None,
         log=log,
         error=error,
         preset=preset,
@@ -164,11 +167,14 @@ def run_clean_only(input_path: Path, options: PipelineOptions) -> AnalysisResult
         result=None,
         report=None,
         summary=None,
+        cleaning_stats=paths["cleaning_stats"] if paths["cleaning_stats"].exists() else None,
         log=log,
         preset=options.preset,
     )
     if paths["cleaned"].exists():
         shutil.copy2(paths["cleaned"], REPORTS_DIR / "cleaned.xlsx")
+    if result.cleaning_stats and result.cleaning_stats.exists():
+        shutil.copy2(result.cleaning_stats, REPORTS_DIR / "cleaning_stats.json")
     return result
 
 
@@ -210,6 +216,7 @@ def run_analysis(input_path: Path, options: PipelineOptions | None = None) -> An
         result=paths["result"],
         report=paths["report"],
         summary=paths["summary"],
+        cleaning_stats=paths["cleaning_stats"],
         log=log,
         preset=options.preset,
     )

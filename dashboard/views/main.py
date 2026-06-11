@@ -10,6 +10,8 @@ from components.table import create_table
 from components.kpi import render_kpi_cards
 
 from core.data_loader import load_main_df
+from utils.cleaning_stats import load_cleaning_stats
+from components.cleaning_info import render_cleaning_info
 
 def render_main():
     df = load_main_df()
@@ -21,7 +23,7 @@ def render_main():
     low = empty.copy()
 
     if df is not None:
-        kpi = get_kpi_metrics(df)
+        kpi = get_kpi_metrics(df, load_cleaning_stats())
         severity = get_severity_stats(df)
         high = severity["high"]
         medium = severity["medium"]
@@ -34,6 +36,7 @@ def render_main():
 
     if kpi is not None:
         render_kpi_cards(kpi)
+        render_cleaning_info(kpi.get("cleaning_stats"))
     else:
         st.warning("Загрузите файл в боковой панели и нажмите «Запустить анализ».")
         return

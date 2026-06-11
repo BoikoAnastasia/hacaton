@@ -5,6 +5,7 @@ from analytics import get_kpi_metrics
 
 from components.kpi import render_kpi_cards
 from core.data_loader import load_main_df, load_top10_df
+from utils.cleaning_stats import load_cleaning_stats
 
 def render_graphics():
   df = load_main_df()
@@ -13,7 +14,7 @@ def render_graphics():
   kpi = None
 
   if df is not None:
-    kpi = get_kpi_metrics(df)
+    kpi = get_kpi_metrics(df, load_cleaning_stats())
 
   st.subheader("Результат анализа")
 

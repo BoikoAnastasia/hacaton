@@ -2,6 +2,7 @@
 $Project = $PSScriptRoot
 $Venv = @(
     (Join-Path $Project ".venv"),
+    (Join-Path $Project "qwen_env"),
     (Join-Path (Split-Path $Project -Parent) "qwen_env")
 ) | Where-Object { Test-Path (Join-Path $_ "Scripts\streamlit.exe") } | Select-Object -First 1
 

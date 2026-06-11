@@ -25,15 +25,15 @@ def columns_dowload_buttons():
           file_name="report.xlsx"
         )
 
-  # 3 — TXT отчет
+  # 3 — PDF-справка
   with col3:
     if DATA_FILE_SUMMARY.exists():
-      text = DATA_FILE_SUMMARY.read_text(encoding="utf-8")
-      st.download_button(
-        "Краткий отчет",
-          data=text,
-          file_name="report.txt",
-          mime="text/plain"
+      with open(DATA_FILE_SUMMARY, "rb") as f:
+        st.download_button(
+          "Справка PDF",
+          data=f,
+          file_name="report.pdf",
+          mime="application/pdf",
         )
 
   # 4 — ZIP (всё вместе)

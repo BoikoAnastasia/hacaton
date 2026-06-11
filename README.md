@@ -30,7 +30,7 @@
   --mode cluster --turbo
 ```
 
-Результаты: `storage\output\Отчет от …\` (`cleaned.xlsx`, `result.xlsx`, `report.xlsx`, `report.txt`).
+Результаты: `storage\output\Отчет от …\` (`cleaned.xlsx`, `result.xlsx`, `report.xlsx`, `report.pdf`).
 
 ## Режимы обработки
 

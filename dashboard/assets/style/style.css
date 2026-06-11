@@ -36,6 +36,11 @@ section[data-testid="stSidebar"] {
   font-weight: bold;
   color: white;
 }
+.metric-subtitle {
+  color: #9ca3af;
+  font-size: 13px;
+  margin-top: 4px;
+}
 .metric-growth {
   color: #22c55e;
 }

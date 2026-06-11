@@ -5,15 +5,17 @@ from pathlib import Path
 
 import pandas as pd
 
+from cleaning_stats import load_cleaning_stats
 from columns import COL_PROBLEM, COL_SEVERITY, COL_SUMMARY, normalize_analysis_columns
 from location_utils import make_district_key
+from pdf_report import generate_leadership_pdf
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Агрегация проблемных районов Top-3 / Top-10")
     parser.add_argument("--input", required=True, help="Excel после LLM-анализа")
     parser.add_argument("--output", default=None, help="Итоговый отчёт Excel")
-    parser.add_argument("--summary", default=None, help="Текстовая справка для руководства")
+    parser.add_argument("--summary", default=None, help="PDF-справка для руководства")
     return parser.parse_args()
 
 
@@ -57,7 +59,12 @@ def build_district_stats(df):
     return stats.sort_values("рейтинг", ascending=False).reset_index(drop=True)
 
 
-def build_leadership_summary(stats, total_rows, total_problems):
+def build_leadership_summary(
+    stats,
+    total_rows,
+    total_problems,
+    total_input: int | None = None,
+):
     if stats.empty:
         return "Проблемных обращений не выявлено."
 
@@ -65,11 +72,19 @@ def build_leadership_summary(stats, total_rows, total_problems):
         "СПРАВКА ПО ПРОБЛЕМНЫМ РАЙОНАМ",
         f"Дата: {datetime.now().strftime('%d.%m.%Y %H:%M')}",
         "",
-        f"Проанализировано обращений: {total_rows}",
+    ]
+    if total_input and total_input != total_rows:
+        lines.extend([
+            f"Всего в исходном файле: {total_input}",
+            f"Отобрано к анализу (открытые решаемые): {total_rows}",
+        ])
+    else:
+        lines.append(f"Проанализировано обращений: {total_rows}")
+    lines.extend([
         f"Выявлено проблем: {total_problems}",
         "",
         "ТОП-3 ПРОБЛЕМНЫХ РАЙОНА:",
-    ]
+    ])
 
     for _, row in stats.head(3).iterrows():
         lines.append(
@@ -91,6 +106,9 @@ def run_aggregate(input_file, output_file=None, summary_file=None):
 
     stats = build_district_stats(df)
     total_problems = int((df[COL_PROBLEM] == True).sum())  # noqa: E712
+    analyzed_count = len(df)
+    cleaning = load_cleaning_stats(Path(input_file).parent / "cleaning_stats.json")
+    total_input = cleaning["total_input"] if cleaning else analyzed_count
 
     if output_file is None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -102,30 +120,42 @@ def run_aggregate(input_file, output_file=None, summary_file=None):
         top10.insert(0, "ранг", range(1, len(top10) + 1))
         top3.insert(0, "ранг", range(1, len(top3) + 1))
 
-    text_summary = build_leadership_summary(stats, len(df), total_problems)
-
     with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
         top10.to_excel(writer, sheet_name="Топ-10", index=False)
         top3.to_excel(writer, sheet_name="Топ-3", index=False)
         stats.to_excel(writer, sheet_name="Все районы", index=False)
 
+        avg_severity = (
+            round(df[COL_SEVERITY].mean(), 2)
+            if COL_SEVERITY in df.columns and analyzed_count
+            else 0.0
+        )
         overview = pd.DataFrame([{
-            "всего_обращений": len(df),
+            "всего_в_файле": total_input,
+            "отобрано_к_анализу": analyzed_count,
             "выявлено_проблем": total_problems,
             "районов_с_проблемами": len(stats),
-            "доля_проблем_%": round(total_problems / len(df) * 100, 1) if len(df) else 0,
+            "средняя_тяжесть": avg_severity,
+            "доля_проблем_%": round(total_problems / analyzed_count * 100, 1) if analyzed_count else 0,
         }])
         overview.to_excel(writer, sheet_name="Обзор", index=False)
 
     print(f"Отчёт: {output_file}")
 
     if summary_file is None:
-        summary_file = Path(output_file).with_suffix(".txt")
+        summary_file = Path(output_file).with_suffix(".pdf")
 
-    Path(summary_file).write_text(text_summary, encoding="utf-8")
-    print(f"Справка: {summary_file}")
+    generate_leadership_pdf(
+        stats,
+        analyzed_count,
+        total_problems,
+        summary_file,
+        total_input=total_input,
+        avg_severity=avg_severity,
+    )
+    print(f"Справка (PDF): {summary_file}")
     print()
-    print(text_summary)
+    print(build_leadership_summary(stats, analyzed_count, total_problems, total_input))
 
     return output_file, summary_file
 
