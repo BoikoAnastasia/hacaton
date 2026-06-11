@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.express as px
 
 def get_layout(title):
 	return dict(
@@ -209,20 +210,6 @@ def plot_top_10(df, title, category_col, color):
 	fig.update_layout(**get_layout(title))
 
 	return fig
-
-def plot_distribution(df):
-	dist = df["Населенный пункт"].value_counts()
-
-	fig = go.Figure(go.Bar(
-		x=dist.index,
-		y=dist.values,
-		marker_color="#6366F1"
-	))
-
-	fig.update_layout(**get_layout("Распределение по населенным пунктам"))
-
-	st.plotly_chart(fig, use_container_width=True)
-
 
 def create_bar_severity(df):
 

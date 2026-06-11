@@ -1,11 +1,13 @@
 import streamlit as st
 
-from charts import (create_problem_pie, plot_top_10, create_municipality_chart, create_bar_severity, plot_classification, plot_dynamics, plot_distribution)
+from charts import (create_problem_pie, plot_top_10, create_municipality_chart, create_bar_severity, plot_classification, plot_dynamics)
 from analytics import get_kpi_metrics
 
 from components.kpi import render_kpi_cards
 from core.data_loader import load_main_df, load_top10_df
 from utils.cleaning_stats import load_cleaning_stats
+
+from components.geocoder import plot_omsk_choropleth
 
 def render_graphics():
   df = load_main_df()
@@ -22,6 +24,17 @@ def render_graphics():
     render_kpi_cards(kpi)
   else:
     st.warning("KPI не рассчитан")
+
+  fig = plot_omsk_choropleth(df)
+
+  st.plotly_chart(
+    fig,
+    use_container_width=True,
+    key="omsk_choropleth_map",
+    config={
+      "scrollZoom": True
+    }
+  ) 
 
   col1, col2 = st.columns(2)
 
@@ -54,4 +67,4 @@ def render_graphics():
     )
     plot_dynamics(df)
 
-  plot_distribution(df)
+
