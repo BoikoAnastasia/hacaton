@@ -1,13 +1,13 @@
 import streamlit as st
 
-from core.config import DATA_FILE_SUMMARY
+from core.report_context import get_active_report_dir
 from core.data_loader import load_main_df
 from utils.cleaning_stats import load_cleaning_stats
 from components.cleaning_info import render_cleaning_info
-from components.downloads import columns_dowload_buttons
 from analytics import get_kpi_metrics
 from components.kpi import render_kpi_cards
 from components.table import create_table
+from utils.summary_text import load_leadership_summary_text
 
 def render_reports():
   df = load_main_df()
@@ -25,16 +25,20 @@ def render_reports():
   else:
     st.warning("KPI не рассчитан")
 
-  st.subheader("Скачать отчёты")
-  columns_dowload_buttons();
+  active_dir = get_active_report_dir()
+  if active_dir:
+    st.caption(
+      f"Папка отчёта: **{active_dir.name}** · "
+      "PDF-справка и остальные файлы — на главной"
+    )
 
-  st.subheader("Справка для руководства")
+  st.subheader("Краткая сводка")
 
-  if DATA_FILE_SUMMARY.exists():
-    with open(DATA_FILE_SUMMARY, "rb") as f:
-      st.pdf(f.read(), height=720)
+  summary_text = load_leadership_summary_text()
+  if summary_text:
+    st.text(summary_text)
   else:
-    st.info("PDF-справка появится после завершения анализа.")
+    st.info("Краткая сводка появится после завершения анализа.")
 
   create_table(df)
 

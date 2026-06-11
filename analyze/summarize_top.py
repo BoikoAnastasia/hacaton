@@ -119,7 +119,9 @@ def main():
         all_districts.to_excel(writer, sheet_name="Все районы", index=False)
         overview.to_excel(writer, sheet_name="Обзор", index=False)
 
-    pdf_path = Path(output).with_suffix(".pdf")
+    from export_names import KIND_SUMMARY, export_path
+
+    pdf_path = export_path(Path(output).parent, KIND_SUMMARY)
     generate_pdf_from_report_xlsx(output, pdf_path)
     print(f"Обновлён: {output}")
     print(f"PDF-справка: {pdf_path}")

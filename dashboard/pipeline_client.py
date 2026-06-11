@@ -57,15 +57,15 @@ def save_upload(uploaded_bytes: bytes, original_name: str) -> Path:
 def publish_to_dashboard(result: AnalysisResult) -> None:
     """Копия отчётов в dashboard/data/reports/ для UI."""
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    for src, name in (
-        (result.result, "result.xlsx"),
-        (result.report, "report.xlsx"),
-        (result.summary, "report.pdf"),
-        (result.cleaned, "cleaned.xlsx"),
-        (result.cleaning_stats, "cleaning_stats.json"),
+    for src in (
+        result.result,
+        result.report,
+        result.summary,
+        result.cleaned,
+        result.cleaning_stats,
     ):
         if src and Path(src).exists():
-            shutil.copy2(src, REPORTS_DIR / name)
+            shutil.copy2(src, REPORTS_DIR / Path(src).name)
 
 
 def _run_subprocess(cmd: list[str], cwd: Path) -> tuple[int, str]:

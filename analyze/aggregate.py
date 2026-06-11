@@ -1,12 +1,14 @@
 import argparse
-from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
 
 from cleaning_stats import load_cleaning_stats
-from columns import COL_PROBLEM, COL_SEVERITY, COL_SUMMARY, normalize_analysis_columns
+from columns import COL_PROBLEM, COL_SEVERITY, normalize_analysis_columns
+from summary_utils import build_district_key_problems
+from export_names import KIND_SUMMARY, KIND_SUMMARY_TXT, export_path
+from leadership_summary import build_leadership_summary
 from location_utils import make_district_key
 from pdf_report import generate_leadership_pdf
 
@@ -26,13 +28,6 @@ def build_district_stats(df):
     rows = []
     for district, group in problems.groupby("район"):
         severities = group[COL_SEVERITY].fillna(1).astype(int)
-        summaries = group[COL_SUMMARY].dropna().astype(str)
-        summary_counts = Counter(
-            s for s in summaries
-            if s and s.lower() not in ("ошибка парсинга", "ошибка генерации")
-        )
-
-        top_issues = [text for text, _ in summary_counts.most_common(5)]
         examples = []
         for col in ("Очищенный текст", "clean_text", "Текст инцидента"):
             if col in group.columns:
@@ -48,7 +43,7 @@ def build_district_stats(df):
             "сумма_тяжести": int(severities.sum()),
             "средняя_тяжесть": round(severities.mean(), 2),
             "рейтинг": int(severities.sum() + len(group)),
-            "ключевые_проблемы": "; ".join(top_issues),
+            "ключевые_проблемы": build_district_key_problems(group),
             "примеры_обращений": " | ".join(str(e)[:200] for e in examples),
         })
 
@@ -57,47 +52,6 @@ def build_district_stats(df):
         return stats
 
     return stats.sort_values("рейтинг", ascending=False).reset_index(drop=True)
-
-
-def build_leadership_summary(
-    stats,
-    total_rows,
-    total_problems,
-    total_input: int | None = None,
-):
-    if stats.empty:
-        return "Проблемных обращений не выявлено."
-
-    lines = [
-        "СПРАВКА ПО ПРОБЛЕМНЫМ РАЙОНАМ",
-        f"Дата: {datetime.now().strftime('%d.%m.%Y %H:%M')}",
-        "",
-    ]
-    if total_input and total_input != total_rows:
-        lines.extend([
-            f"Всего в исходном файле: {total_input}",
-            f"Отобрано к анализу (открытые решаемые): {total_rows}",
-        ])
-    else:
-        lines.append(f"Проанализировано обращений: {total_rows}")
-    lines.extend([
-        f"Выявлено проблем: {total_problems}",
-        "",
-        "ТОП-3 ПРОБЛЕМНЫХ РАЙОНА:",
-    ])
-
-    for _, row in stats.head(3).iterrows():
-        lines.append(
-            f"\n{row['район']}: {row['количество_проблем']} проблем, "
-            f"суммарная тяжесть {row['сумма_тяжести']}. "
-            f"Основные причины: {row['ключевые_проблемы']}"
-        )
-
-    lines.extend(["", "ТОП-10 (кратко):"])
-    for i, row in stats.head(10).iterrows():
-        lines.append(f"{i + 1}. {row['район']} — {row['количество_проблем']} проблем")
-
-    return "\n".join(lines)
 
 
 def run_aggregate(input_file, output_file=None, summary_file=None):
@@ -143,7 +97,14 @@ def run_aggregate(input_file, output_file=None, summary_file=None):
     print(f"Отчёт: {output_file}")
 
     if summary_file is None:
-        summary_file = Path(output_file).with_suffix(".pdf")
+        summary_file = export_path(Path(output_file).parent, KIND_SUMMARY)
+
+    text_summary = build_leadership_summary(
+        stats, analyzed_count, total_problems, total_input,
+    )
+    txt_path = export_path(Path(output_file).parent, KIND_SUMMARY_TXT)
+    txt_path.write_text(text_summary, encoding="utf-8")
+    print(f"Сводка (TXT): {txt_path}")
 
     generate_leadership_pdf(
         stats,
@@ -155,7 +116,7 @@ def run_aggregate(input_file, output_file=None, summary_file=None):
     )
     print(f"Справка (PDF): {summary_file}")
     print()
-    print(build_leadership_summary(stats, analyzed_count, total_problems, total_input))
+    print(text_summary)
 
     return output_file, summary_file
 

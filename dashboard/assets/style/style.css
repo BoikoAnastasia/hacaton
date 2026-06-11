@@ -45,33 +45,51 @@ section[data-testid="stSidebar"] {
   color: #22c55e;
 }
 
-.nav-btn {
-  margin-bottom: 16px;
+/* Навигация в сайдбаре — только кнопки nav_* */
+.st-key-nav_main,
+.st-key-nav_graphics,
+.st-key-nav_reports {
+  margin-bottom: 8px;
 }
 
-.nav-btn, button[data-testid="stBaseButton-secondary"] {
+.st-key-nav_main button,
+.st-key-nav_graphics button,
+.st-key-nav_reports button {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 40px;
-  padding: 10px 12px;
+  min-height: 40px;
   border-radius: 10px;
-  text-align: center;
-  background-color: transparent;
-  border: 1px solid transparent;
-  color: var(--grey);
   font-weight: 500;
 }
 
-.nav-btn.active {
-  background: var(--hover-btn);
-  color: var(--white);
-  border: 1px solid var(--hover-btn);
+.st-key-nav_main [data-testid="stBaseButton-secondary"],
+.st-key-nav_graphics [data-testid="stBaseButton-secondary"],
+.st-key-nav_reports [data-testid="stBaseButton-secondary"] {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--grey);
 }
 
-.nav-btn:hover {
+.st-key-nav_main [data-testid="stBaseButton-secondary"]:hover,
+.st-key-nav_graphics [data-testid="stBaseButton-secondary"]:hover,
+.st-key-nav_reports [data-testid="stBaseButton-secondary"]:hover {
   border: 1px solid var(--hover-btn);
-  cursor: pointer;
+  color: var(--white);
+}
+
+.st-key-nav_main [data-testid="stBaseButton-primary"],
+.st-key-nav_graphics [data-testid="stBaseButton-primary"],
+.st-key-nav_reports [data-testid="stBaseButton-primary"] {
+  background: var(--hover-btn);
+  border: 1px solid var(--hover-btn);
+  color: var(--white);
+}
+
+.st-key-report_history_apply [data-testid="stBaseButton-primary"] {
+  background: var(--button);
+  border: 1px solid var(--button);
+  color: white;
 }
 
 section[data-testid="stFileUploaderDropzone"] {
@@ -108,18 +126,38 @@ section[data-testid="stVerticalBlock"]:has([data-testid="stFileUploader"]) {
   font-weight: 500;
 }
 
-div[data-testid="stElementContainer"]:has(.stDownloadButton button) {
+/* Скачивание — только в основной области, не в сайдбаре */
+[data-testid="stMain"] div[data-testid="stElementContainer"]:has(.stDownloadButton button) {
   width: 100%;
 }
 
-.stDownloadButton button {
+[data-testid="stMain"] .stDownloadButton button {
   background-color: var(--button);
   width: 100%;
 }
 
-.stDownloadButton button:hover {
+[data-testid="stMain"] .stDownloadButton button:hover {
   background: var(--purple);
   color: white;
+}
+
+/* PDF-справка — страницы без панели браузера */
+[data-testid="stMain"] [data-testid="stVerticalBlockBorderWrapper"] [data-testid="stImage"] img {
+  background: #fff;
+  border-radius: 8px;
+}
+
+/* Заглушки «файл отсутствует» — в ряд с кнопками скачивания */
+[data-testid="stMain"] .st-key-dl_result_missing button,
+[data-testid="stMain"] .st-key-dl_report_missing button,
+[data-testid="stMain"] .st-key-dl_summary_missing button,
+[data-testid="stMain"] .st-key-dl_zip_empty button {
+  width: 100%;
+  opacity: 0.45;
+  border: 1px dashed #4b5563;
+  background: transparent;
+  color: #9ca3af;
+  cursor: not-allowed;
 }
   
 /* cards */

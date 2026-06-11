@@ -7,6 +7,7 @@ DASHBOARD_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = DASHBOARD_DIR / "data"
 UPLOADS_DIR = DATA_DIR / "uploads"
 REPORTS_DIR = DATA_DIR / "reports"
+OUTPUT_REPORTS_ROOT = PROJECT_ROOT / "storage" / "output"
 
 DATA_FILE_TOP_10 = REPORTS_DIR / "report.xlsx"
 DATA_FILE_RESULT = REPORTS_DIR / "result.xlsx"

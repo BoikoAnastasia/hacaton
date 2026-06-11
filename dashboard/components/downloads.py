@@ -1,61 +1,91 @@
 import streamlit as st
 
-from core.config import DATA_FILE_SUMMARY, DATA_FILE_TOP_10, DATA_FILE_RESULT
+from core.report_context import get_active_report_dir
+from core.report_files import (
+    DOWNLOAD_KINDS,
+    ZIP_EXTRA_KINDS,
+    download_filename,
+    find_report_file,
+    zip_download_name,
+)
 from utils.make_zip import make_zip
 
+DOWNLOAD_LABELS = {
+    "result": "Полный Excel",
+    "report": "Топ-10 Excel",
+    "summary": "Справка PDF",
+}
+
+DOWNLOAD_MIME = {
+    "summary": "application/pdf",
+}
+
+
+def render_download_buttons(*, key_prefix: str = "dl") -> None:
+    base_dir = get_active_report_dir()
+    available = []
+    for kind in DOWNLOAD_KINDS:
+        path = find_report_file(kind)
+        if path and path.exists():
+            available.append((kind, path))
+
+    if not available:
+        st.info("В выбранном отчёте нет файлов для скачивания.")
+        return
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    for col, kind in zip((col1, col2, col3), DOWNLOAD_KINDS):
+        label = DOWNLOAD_LABELS[kind]
+        path = find_report_file(kind)
+        with col:
+            if path and path.exists():
+                mime = DOWNLOAD_MIME.get(kind)
+                with open(path, "rb") as f:
+                    kwargs = {
+                        "label": label,
+                        "data": f,
+                        "file_name": download_filename(kind),
+                        "key": f"{key_prefix}_{kind}",
+                    }
+                    if mime:
+                        kwargs["mime"] = mime
+                    st.download_button(**kwargs)
+            else:
+                st.button(
+                    f"{label} — нет",
+                    disabled=True,
+                    use_container_width=True,
+                    key=f"{key_prefix}_{kind}_missing",
+                    help="Файл отсутствует в этой папке (старый отчёт).",
+                )
+
+    zip_items = list(available)
+    for kind in ZIP_EXTRA_KINDS:
+        path = find_report_file(kind)
+        if path and path.exists():
+            zip_items.append((kind, path))
+
+    zip_paths = [path for _, path in zip_items]
+    zip_names = [download_filename(kind) for kind, _ in zip_items]
+    with col4:
+        if len(zip_paths) > 1:
+            st.download_button(
+                "Скачать всё",
+                data=make_zip(zip_paths, zip_names),
+                file_name=zip_download_name(),
+                mime="application/zip",
+                key=f"{key_prefix}_zip",
+            )
+        elif len(zip_paths) == 1:
+            st.button(
+                "Скачать всё",
+                disabled=True,
+                use_container_width=True,
+                key=f"{key_prefix}_zip_empty",
+                help="Нужно минимум два файла для архива.",
+            )
+
+
 def columns_dowload_buttons():
-  col1, col2, col3, col4 = st.columns(4)
-  # 1 — Excel result
-  with col1:
-    if DATA_FILE_RESULT.exists():
-      with open(DATA_FILE_RESULT, "rb") as f:
-        st.download_button(
-          "Полный Excel",
-          data=f,
-          file_name="result.xlsx"
-        )
-
-  # 2 — Top10 Excel
-  with col2:
-    if DATA_FILE_TOP_10.exists():
-      with open(DATA_FILE_TOP_10, "rb") as f:
-        st.download_button(
-          "Топ 10 Excel",
-          data=f,
-          file_name="report.xlsx"
-        )
-
-  # 3 — PDF-справка
-  with col3:
-    if DATA_FILE_SUMMARY.exists():
-      with open(DATA_FILE_SUMMARY, "rb") as f:
-        st.download_button(
-          "Справка PDF",
-          data=f,
-          file_name="report.pdf",
-          mime="application/pdf",
-        )
-
-  # 4 — ZIP (всё вместе)
-  with col4:
-    files = []
-
-    if DATA_FILE_RESULT.exists():
-      files.append(DATA_FILE_RESULT)
-
-    if DATA_FILE_TOP_10.exists():
-      files.append(DATA_FILE_TOP_10)
-
-    if DATA_FILE_SUMMARY.exists():
-      files.append(DATA_FILE_SUMMARY)
-
-    if files:
-      zip_buffer = make_zip(files)
-
-      st.download_button(
-        "Скачать всё",
-        data=zip_buffer,
-        file_name="reports.zip",
-        mime="application/zip",
-        key="dl_all"
-      )
+    render_download_buttons(key_prefix="main")

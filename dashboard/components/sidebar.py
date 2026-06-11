@@ -3,6 +3,7 @@ import base64
 import streamlit as st
 
 from components.nav_button import nav_button
+from components.report_history import render_report_history
 from pipeline_client import run_analysis, save_upload
 from pipeline_options import PRESETS, DEFAULT_PRESET, PipelineOptions
 
@@ -48,6 +49,10 @@ def sidebar():
         nav_button("Главная", "main")
         nav_button("Анализ", "graphics")
         nav_button("Отчёты", "reports")
+
+        st.divider()
+
+        render_report_history()
 
         st.divider()
 
@@ -118,7 +123,13 @@ def sidebar():
                     result = run_analysis(saved, options)
 
                 if result.ok:
-                    st.session_state["last_report_dir"] = str(result.report_dir)
+                    report_path = str(result.report_dir.resolve())
+                    st.session_state["last_report_dir"] = report_path
+                    st.session_state["active_report_path"] = report_path
+                    st.session_state["_force_history_sync"] = report_path
+                    st.session_state["report_data_version"] = (
+                        st.session_state.get("report_data_version", 0) + 1
+                    )
                     st.session_state["last_preset"] = options.preset
                     if info.updates_dashboard:
                         st.success("Готово. Обновляем дашборд…")

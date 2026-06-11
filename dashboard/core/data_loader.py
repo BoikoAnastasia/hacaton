@@ -1,13 +1,17 @@
 import pandas as pd
-from core.config import DATA_FILE_RESULT, DATA_FILE_TOP_10
+
+from core.report_files import KIND_REPORT, KIND_RESULT, find_report_file
+
 
 def load_main_df():
-  if DATA_FILE_RESULT.exists():
-    return pd.read_excel(DATA_FILE_RESULT)
-  return None
+    path = find_report_file(KIND_RESULT)
+    if path:
+        return pd.read_excel(path)
+    return None
 
 
 def load_top10_df():
-  if DATA_FILE_TOP_10.exists():
-    return pd.read_excel(DATA_FILE_TOP_10)
-  return None
+    path = find_report_file(KIND_REPORT)
+    if path:
+        return pd.read_excel(path)
+    return None

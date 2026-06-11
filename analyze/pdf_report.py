@@ -15,6 +15,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     HRFlowable,
+    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -393,6 +394,65 @@ def _top10_table(styles: dict[str, ParagraphStyle], top10: pd.DataFrame) -> list
     ]
 
 
+def _brief_summary_section(
+    styles: dict[str, ParagraphStyle],
+    stats: pd.DataFrame,
+    total_rows: int,
+    total_problems: int,
+    total_input: int | None,
+) -> list:
+    elements = [
+        Paragraph("Краткая сводка", styles["section"]),
+        Spacer(1, 4),
+    ]
+
+    if stats.empty:
+        elements.append(Paragraph("Проблемных обращений не выявлено.", styles["body"]))
+        return elements
+
+    if total_input and total_input != total_rows:
+        elements.append(Paragraph(
+            f"В исходном файле <b>{total_input}</b> обращений; "
+            f"к анализу отобрано <b>{total_rows}</b> открытых решаемых.",
+            styles["body"],
+        ))
+    else:
+        elements.append(Paragraph(
+            f"Проанализировано <b>{total_rows}</b> обращений.",
+            styles["body"],
+        ))
+
+    share = round(total_problems / total_rows * 100, 1) if total_rows else 0
+    elements.append(Paragraph(
+        f"Выявлено <b>{total_problems}</b> проблем ({share}% от отобранных). "
+        f"Районов с проблемами: <b>{len(stats)}</b>.",
+        styles["body"],
+    ))
+    elements.append(Spacer(1, 8))
+    elements.append(Paragraph("<b>ТОП-3 проблемных района</b>", styles["body"]))
+    elements.append(Spacer(1, 4))
+
+    for _, row in stats.head(3).iterrows():
+        causes = str(row.get("ключевые_проблемы", "")) or "—"
+        elements.append(Paragraph(
+            f"<b>{row['район']}</b> — {row['количество_проблем']} проблем, "
+            f"суммарная тяжесть {row['сумма_тяжести']}. "
+            f"Основные причины: {causes}",
+            styles["body"],
+        ))
+        elements.append(Spacer(1, 4))
+
+    elements.append(Spacer(1, 4))
+    elements.append(Paragraph("<b>ТОП-10 (кратко)</b>", styles["body"]))
+    brief_lines = [
+        f"{i + 1}. {row['район']} — {row['количество_проблем']} проблем"
+        for i, row in stats.head(10).iterrows()
+    ]
+    elements.append(Paragraph("<br/>".join(brief_lines), styles["body"]))
+    elements.append(Spacer(1, 12))
+    return elements
+
+
 def _llm_section(
     styles: dict[str, ParagraphStyle],
     llm_rows: list[dict],
@@ -433,11 +493,8 @@ def generate_leadership_pdf(
 
     styles = _styles()
     top10 = stats.head(10).copy()
-    top3 = stats.head(3).copy()
     if not top10.empty and "ранг" not in top10.columns:
         top10.insert(0, "ранг", range(1, len(top10) + 1))
-    if not top3.empty and "ранг" not in top3.columns:
-        top3.insert(0, "ранг", range(1, len(top3) + 1))
 
     problem_share = (total_problems / total_rows * 100) if total_rows else 0.0
     story: list = []
@@ -453,7 +510,11 @@ def generate_leadership_pdf(
         avg_severity,
     ))
     story.append(Spacer(1, 14))
-    story.extend(_top3_cards(styles, top3))
+    story.extend(_brief_summary_section(
+        styles, stats, total_rows, total_problems, total_input,
+    ))
+    if not top10.empty:
+        story.append(PageBreak())
     story.extend(_top10_table(styles, top10))
     story.extend(_llm_section(styles, llm_rows or []))
 
@@ -485,7 +546,12 @@ def generate_pdf_from_report_xlsx(
 ) -> Path:
     """Пересобрать PDF из готового report.xlsx (после гибридного режима)."""
     xlsx_path = Path(xlsx_path)
-    pdf_path = Path(pdf_path) if pdf_path else xlsx_path.with_suffix(".pdf")
+    if pdf_path:
+        pdf_path = Path(pdf_path)
+    else:
+        from export_names import KIND_SUMMARY, export_path
+
+        pdf_path = export_path(xlsx_path.parent, KIND_SUMMARY)
 
     overview = pd.read_excel(xlsx_path, sheet_name="Обзор")
     top10 = pd.read_excel(xlsx_path, sheet_name="Топ-10")
@@ -507,6 +573,16 @@ def generate_pdf_from_report_xlsx(
             desc = row.get("описание_llm")
             if pd.notna(desc) and str(desc).strip():
                 llm_rows.append({"район": row["район"], "описание_llm": str(desc)})
+
+    from export_names import KIND_SUMMARY_TXT, export_path
+    from leadership_summary import build_leadership_summary
+
+    text_summary = build_leadership_summary(
+        all_districts, total_rows, total_problems, total_input,
+    )
+    export_path(xlsx_path.parent, KIND_SUMMARY_TXT).write_text(
+        text_summary, encoding="utf-8",
+    )
 
     return generate_leadership_pdf(
         all_districts,

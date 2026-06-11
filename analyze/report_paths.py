@@ -3,6 +3,15 @@
 from datetime import datetime
 from pathlib import Path
 
+from export_names import (
+    KIND_CLEANED,
+    KIND_CLEANING_STATS,
+    KIND_REPORT,
+    KIND_RESULT,
+    KIND_SUMMARY,
+    export_path,
+)
+
 
 def make_report_dir_name(when: datetime | None = None) -> str:
     """Имя папки: «Отчет от дд.мм.гг - чч.мм» (точка вместо «:» в времени — ограничение Windows)."""
@@ -39,9 +48,9 @@ def make_report_dir(base_dir: Path, when: datetime | None = None) -> Path:
 
 def report_files(report_dir: Path) -> dict[str, Path]:
     return {
-        "cleaned": report_dir / "cleaned.xlsx",
-        "result": report_dir / "result.xlsx",
-        "report": report_dir / "report.xlsx",
-        "summary": report_dir / "report.pdf",
-        "cleaning_stats": report_dir / "cleaning_stats.json",
+        KIND_CLEANED: export_path(report_dir, KIND_CLEANED),
+        KIND_RESULT: export_path(report_dir, KIND_RESULT),
+        KIND_REPORT: export_path(report_dir, KIND_REPORT),
+        KIND_SUMMARY: export_path(report_dir, KIND_SUMMARY),
+        KIND_CLEANING_STATS: report_dir / "cleaning_stats.json",
     }

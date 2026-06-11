@@ -1,9 +1,10 @@
 import json
 
-from core.config import DATA_FILE_CLEANING_STATS
+from core.report_files import KIND_CLEANING_STATS, find_report_file
 
 
 def load_cleaning_stats() -> dict | None:
-    if not DATA_FILE_CLEANING_STATS.exists():
-        return None
-    return json.loads(DATA_FILE_CLEANING_STATS.read_text(encoding="utf-8"))
+    path = find_report_file(KIND_CLEANING_STATS)
+    if path and path.exists():
+        return json.loads(path.read_text(encoding="utf-8"))
+    return None

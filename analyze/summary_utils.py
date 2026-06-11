@@ -1,6 +1,9 @@
 """Краткие описания проблем для колонки «Суть проблемы» (без LLM)."""
 
+from __future__ import annotations
+
 import re
+from collections import Counter
 
 import pandas as pd
 
@@ -54,6 +57,15 @@ DETAIL_PATTERNS = [
 
 MAX_WORDS = 10
 ERROR_SUMMARIES = frozenset({"ошибка парсинга", "ошибка генерации"})
+
+LOCALITY_HINT_RE = re.compile(
+    r"^(?:омск|г\.?\s*омск|город|пос\.?|пос[её]лок|микрорайон|мкр\.?)",
+    re.IGNORECASE,
+)
+ADDRESS_PART_RE = re.compile(
+    r"^(?:ул\.?|улиц\w*|пр\.?|пер\.?|д\.?\s*\d|дом\s+\d)",
+    re.IGNORECASE,
+)
 
 
 def _clean_field(value) -> str | None:
@@ -232,7 +244,6 @@ def make_summary(
     theme_short = _shorten_label(theme)
     group_short = _shorten_label(group) if not theme_short else None
     detail = _extract_detail(str(text))
-    location = _format_location(street, house, locality) or _extract_address(str(text))
 
     if theme_short:
         base = theme_short
@@ -245,8 +256,6 @@ def make_summary(
     parts = [base]
     if detail and detail.lower() not in base.lower():
         parts.append(detail)
-    if location and location.lower() not in " ".join(parts).lower():
-        parts.append(location)
 
     result = _join_summary_parts(parts)
     return result if result else "Проблема в обращении"
@@ -262,3 +271,61 @@ def make_summary_from_row(row, text: str, is_problem: bool) -> str:
         house=row.get("Дом"),
         locality=row.get("Населенный пункт"),
     )
+
+
+def _thematic_part_from_summary(summary: str) -> str:
+    """Суть без хвоста с адресом («аварии, омск, ул. …» → «аварии»)."""
+    text = summary.strip()
+    if not text or text.lower() in ERROR_SUMMARIES:
+        return ""
+
+    parts = [p.strip() for p in text.split(",") if p.strip()]
+    if not parts:
+        return ""
+
+    kept = [parts[0]]
+    for part in parts[1:]:
+        if LOCALITY_HINT_RE.match(part) or ADDRESS_PART_RE.match(part):
+            break
+        if ADDRESS_RE.search(part):
+            break
+        kept.append(part)
+
+    label = _shorten_label(", ".join(kept)) or parts[0]
+    return _capitalize_first(label)
+
+
+def thematic_label_from_row(row) -> str | None:
+    """Тематическая метка для агрегации по району (без адресов)."""
+    theme = _shorten_label(row.get("Тема"))
+    if theme:
+        return _capitalize_first(theme)
+
+    group = _shorten_label(row.get("Группа тем"))
+    if group:
+        return _capitalize_first(group)
+
+    for col in ("Суть проблемы", "summary"):
+        if col in row.index and pd.notna(row[col]):
+            label = _thematic_part_from_summary(str(row[col]))
+            if label:
+                return label
+    return None
+
+
+def build_district_key_problems(group: pd.DataFrame) -> str:
+    """Топ тематических причин в районе для справки руководству."""
+    labels: list[str] = []
+    for _, row in group.iterrows():
+        label = thematic_label_from_row(row)
+        if label:
+            labels.append(label.lower())
+
+    if not labels:
+        return ""
+
+    parts: list[str] = []
+    for name, cnt in Counter(labels).most_common(5):
+        display = _capitalize_first(name)
+        parts.append(f"{display} ({cnt})" if cnt > 1 else display)
+    return "; ".join(parts)
