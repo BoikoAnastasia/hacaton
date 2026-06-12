@@ -4,6 +4,7 @@ from components.sidebar import sidebar
 from views.main import render_main
 from views.graphics import render_graphics
 from views.reports import render_reports
+from views.compare import render_compare
 
 if "page" not in st.session_state:
     st.session_state.page = "main"
@@ -33,3 +34,6 @@ elif page == "graphics":
 
 elif page == "reports":
     render_reports()
+
+elif page == "compare":
+    render_compare()

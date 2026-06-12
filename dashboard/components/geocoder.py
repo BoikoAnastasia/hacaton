@@ -91,7 +91,7 @@ def plot_omsk_choropleth(df):
 
   fig.update_layout(
     height=580,
-    margin=dict(r=0, t=0, l=0, b=0),
+    margin=dict(l=4, r=48, t=4, b=4),
     dragmode="zoom",
     paper_bgcolor=MAP_BG,
     plot_bgcolor=MAP_BG,
@@ -106,6 +106,7 @@ def plot_omsk_choropleth(df):
 
   fig.update_geos(
     fitbounds="locations",
+    domain=dict(x=[0.0, 0.88], y=[0.0, 1.0]),
     visible=False,
     bgcolor=MAP_BG,
     landcolor=MAP_BG,

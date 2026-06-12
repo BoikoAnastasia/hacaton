@@ -45,16 +45,156 @@ section[data-testid="stSidebar"] {
   color: #22c55e;
 }
 
+/* Сравнение отчётов */
+
+.compare-report-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+}
+
+.compare-report-label {
+  color: #9ca3af;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.compare-report-name {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.compare-metric-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 12px;
+  min-height: 148px;
+}
+
+.compare-metric-title {
+  color: #9ca3af;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.compare-metric-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.compare-metric-period {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.compare-metric-tag {
+  color: #6b7280;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.compare-metric-num {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.compare-metric-arrow {
+  color: #4b5563;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.compare-metric-delta {
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.compare-metric-pct {
+  margin-left: 6px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.compare-delta-good {
+  color: #4ade80;
+}
+
+.compare-delta-bad {
+  color: #f87171;
+}
+
+.compare-delta-neutral {
+  color: #9ca3af;
+}
+
+.compare-insight-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.compare-insight-list li {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  color: #e5e7eb;
+  font-size: 14px;
+}
+
+.compare-insight-up li {
+  border-left: 3px solid #f87171;
+}
+
+.compare-insight-down li {
+  border-left: 3px solid #4ade80;
+}
+
+.compare-download-wrap {
+  width: 100%;
+  clear: both;
+  margin-top: 8px;
+}
+
+.st-key-compare_download_pdf {
+  width: 100%;
+}
+
+.st-key-compare_download_pdf [data-testid="stDownloadButton"] {
+  width: 100%;
+}
+
+.st-key-compare_download_pdf button {
+  width: 100%;
+}
+
 /* Навигация в сайдбаре — только кнопки nav_* */
 .st-key-nav_main,
 .st-key-nav_graphics,
-.st-key-nav_reports {
+.st-key-nav_reports,
+.st-key-nav_compare {
   margin-bottom: 8px;
 }
 
 .st-key-nav_main button,
 .st-key-nav_graphics button,
-.st-key-nav_reports button {
+.st-key-nav_reports button,
+.st-key-nav_compare button {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -65,7 +205,8 @@ section[data-testid="stSidebar"] {
 
 .st-key-nav_main [data-testid="stBaseButton-secondary"],
 .st-key-nav_graphics [data-testid="stBaseButton-secondary"],
-.st-key-nav_reports [data-testid="stBaseButton-secondary"] {
+.st-key-nav_reports [data-testid="stBaseButton-secondary"],
+.st-key-nav_compare [data-testid="stBaseButton-secondary"] {
   background-color: transparent;
   border: 1px solid transparent;
   color: var(--grey);
@@ -73,14 +214,16 @@ section[data-testid="stSidebar"] {
 
 .st-key-nav_main [data-testid="stBaseButton-secondary"]:hover,
 .st-key-nav_graphics [data-testid="stBaseButton-secondary"]:hover,
-.st-key-nav_reports [data-testid="stBaseButton-secondary"]:hover {
+.st-key-nav_reports [data-testid="stBaseButton-secondary"]:hover,
+.st-key-nav_compare [data-testid="stBaseButton-secondary"]:hover {
   border: 1px solid var(--hover-btn);
   color: var(--white);
 }
 
 .st-key-nav_main [data-testid="stBaseButton-primary"],
 .st-key-nav_graphics [data-testid="stBaseButton-primary"],
-.st-key-nav_reports [data-testid="stBaseButton-primary"] {
+.st-key-nav_reports [data-testid="stBaseButton-primary"],
+.st-key-nav_compare [data-testid="stBaseButton-primary"] {
   background: var(--hover-btn);
   border: 1px solid var(--hover-btn);
   color: var(--white);
@@ -216,6 +359,7 @@ section[data-testid="stVerticalBlock"]:has([data-testid="stFileUploader"]) {
   border-radius: 16px;
   background: #111827;
   padding: 4px;
+  min-height: 580px;
 }
 
 .st-key-omsk_choropleth_map [data-testid="stPlotlyChart"] .js-plotly-plot,

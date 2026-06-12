@@ -49,6 +49,7 @@ def sidebar():
         nav_button("Главная", "main")
         nav_button("Анализ", "graphics")
         nav_button("Отчёты", "reports")
+        nav_button("Сравнение", "compare")
 
         st.divider()
 
