@@ -1,4 +1,7 @@
-# PyTorch с CUDA — ставится отдельно (см. setup.ps1 и README).
+# ГородОК — зависимости Python
+# PyTorch с CUDA ставится отдельно в setup.ps1 (см. README.md).
+# Python 3.11+, для LLM-режимов нужна GPU и предзагрузка модели (tools/download_model.py).
+
 accelerate>=1.13.0
 bitsandbytes>=0.49.0
 huggingface_hub>=0.34.0

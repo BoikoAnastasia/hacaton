@@ -1,4 +1,6 @@
 @echo off
+chcp 65001 >nul
 cd /d "%~dp0"
+echo ГородОК — установка окружения
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup.ps1"
-pause
+if errorlevel 1 pause

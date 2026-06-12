@@ -1,13 +1,51 @@
 import streamlit as st
 import pandas as pd
+import plotly.colors as pc
 import plotly.express as px
 import plotly.graph_objects as go
 from pathlib import Path
 
 from core.data_loader import load_geojson
 
-def get_layout(title):
-	return dict(
+_MONTHS_RU_FULL = (
+    "января", "февраля", "марта", "апреля", "мая", "июня",
+    "июля", "августа", "сентября", "октября", "ноября", "декабря",
+)
+_MONTHS_RU_SHORT = (
+    "янв", "фев", "мар", "апр", "май", "июн",
+    "июл", "авг", "сен", "окт", "ноя", "дек",
+)
+
+
+def _format_date_ru_full(value) -> str:
+    d = pd.Timestamp(value).date()
+    return f"{d.day} {_MONTHS_RU_FULL[d.month - 1]} {d.year}"
+
+
+def _format_date_ru_short(value) -> str:
+    d = pd.Timestamp(value).date()
+    return f"{d.day} {_MONTHS_RU_SHORT[d.month - 1]}"
+
+
+def _apply_ru_date_axis(fig, dates) -> None:
+    unique = pd.to_datetime(pd.Series(dates)).drop_duplicates().sort_values()
+    if len(unique) <= 20:
+        fig.update_xaxes(
+            tickmode="array",
+            tickvals=unique,
+            ticktext=[_format_date_ru_short(d) for d in unique],
+            tickangle=-45,
+        )
+    else:
+        fig.update_xaxes(tickformat="%d.%m.%Y", tickangle=-45)
+
+
+CHART_HEIGHT = 420
+MAP_ROW_HEIGHT = 580
+
+
+def get_layout(title, height=None):
+	layout = dict(
 		title=dict(
 			text=title,
 			x=0.5,
@@ -19,6 +57,9 @@ def get_layout(title):
 		font_color="white",
 		margin=dict(t=80, l=20, r=20, b=20),
 	)
+	if height is not None:
+		layout["height"] = height
+	return layout
 
 # Подготовка данных для карты
 def prepare_data(df):
@@ -69,7 +110,7 @@ def create_problem_pie(df, highlight_municipality=None):
         textposition="inside"
     )
     
-    fig.update_layout(**get_layout(f"Распределение проблем по категориям{title_suffix}"))    
+    fig.update_layout(**get_layout(f"Распределение проблем по категориям{title_suffix}", CHART_HEIGHT))    
     
     return fig
 
@@ -96,7 +137,7 @@ def create_municipality_sunburst(df, highlight_municipality=None):
         values="Количество",
         title="Распределение проблем по муниципалитетам"
     )
-    fig.update_layout(**get_layout(f"Распределение проблем по муниципалитетам{title_suffix}"))    
+    fig.update_layout(**get_layout(f"Распределение проблем по муниципалитетам{title_suffix}", CHART_HEIGHT))    
     return fig
 
 # ТОП-3 районов
@@ -152,7 +193,7 @@ def plot_classification(df, highlight_municipality=None):
         )
     ])
     
-    fig.update_layout(**get_layout(f"Классификация обращений{title_suffix}"), showlegend=True)    
+    fig.update_layout(**get_layout(f"Классификация обращений{title_suffix}", CHART_HEIGHT), showlegend=True)    
     return fig
 
 # Динамика обращений
@@ -168,19 +209,7 @@ def plot_dynamics(df, highlight_municipality=None):
     df_filtered["Дата создания"] = pd.to_datetime(df_filtered["Дата создания"])
     ts = df_filtered.groupby(df_filtered["Дата создания"].dt.date).size().reset_index()
     ts.columns = ["Дата", "Количество"]
-    
-    # Создаём словарь для перевода месяцев на русский
-    months_ru = {
-        'January': 'января', 'February': 'февраля', 'March': 'марта',
-        'April': 'апреля', 'May': 'мая', 'June': 'июня',
-        'July': 'июля', 'August': 'августа', 'September': 'сентября',
-        'October': 'октября', 'November': 'ноября', 'December': 'декабря'
-    }
-    
-    # Форматируем даты для отображения на русском
-    ts["Дата_рус"] = ts["Дата"].apply(
-        lambda x: f"{x.day} {months_ru[x.strftime('%B')]} {x.year}"
-    )
+    ts["Дата_рус"] = ts["Дата"].apply(_format_date_ru_full)
     
     fig = go.Figure()
     
@@ -195,17 +224,14 @@ def plot_dynamics(df, highlight_municipality=None):
     ))
     
     fig.update_layout(
-        **get_layout(f"Динамика обращений{title_suffix}"),
+        **get_layout(f"Динамика обращений{title_suffix}", CHART_HEIGHT),
         xaxis_title="Дата",
         yaxis_title="Количество обращений",
         hovermode='x unified'
     )
     
-    fig.update_xaxes(
-        tickformat="%d %b",
-        tickangle=-45
-    )
-    
+    _apply_ru_date_axis(fig, ts["Дата"])
+
     return fig
 
 # Горизонтальная бар-диаграмма муниципалитетов
@@ -240,7 +266,7 @@ def create_municipality_chart(df, highlight_municipality=None):
     )
     
     fig.update_layout(
-        **get_layout("Распределение обращений по муниципалитетам"),
+        **get_layout("Распределение обращений по муниципалитетам", CHART_HEIGHT),
         yaxis_title="",
         xaxis_title="Количество обращений"
     )
@@ -248,24 +274,40 @@ def create_municipality_chart(df, highlight_municipality=None):
     return fig
 
 # ТОП-10 диаграмма (универсальная)
-def plot_top_10(df, title, category_col, color, highlight_municipality=None):
-
+def plot_top_10(
+    df,
+    title,
+    category_col,
+    color,
+    highlight_municipality=None,
+    highlight_match_col=None,
+):
     def norm(x):
         return str(x).strip().lower() if pd.notnull(x) else ""
 
-    top = (
-        df[[category_col, "количество_проблем"]]
-        .groupby(category_col, as_index=False)
-        .sum()
-        .sort_values("количество_проблем", ascending=False)
-        .head(10)
-    )
+    match_col = highlight_match_col or category_col
+    base_cols = [category_col, "количество_проблем"]
+    if match_col in df.columns and match_col not in base_cols:
+        top = (
+            df[base_cols + [match_col]]
+            .groupby(category_col, as_index=False)
+            .agg({"количество_проблем": "sum", match_col: "first"})
+        )
+    else:
+        top = (
+            df[base_cols]
+            .groupby(category_col, as_index=False)
+            .sum()
+        )
+        match_col = category_col
+
+    top = top.sort_values("количество_проблем", ascending=False).head(10)
 
     highlight_norm = norm(highlight_municipality)
 
     bar_colors = []
-    for val in top[category_col].values[::-1]:
-        if highlight_municipality and norm(val) == highlight_norm:
+    for _, row in top.iloc[::-1].iterrows():
+        if highlight_municipality and norm(row[match_col]) == highlight_norm:
             bar_colors.append("gold")
         else:
             bar_colors.append(color)
@@ -279,74 +321,57 @@ def plot_top_10(df, title, category_col, color, highlight_municipality=None):
         textposition="outside"
     ))
 
-    fig.update_layout(**get_layout(title))
+    fig.update_layout(**get_layout(title, CHART_HEIGHT))
 
     return fig
 
+def _severity_bar_color(value, vmin, vmax):
+    if vmax <= vmin:
+        return pc.sample_colorscale("Reds", [0.8])[0]
+    t = (float(value) - vmin) / (vmax - vmin)
+    return pc.sample_colorscale("Reds", [t])[0]
+
+
 # Bar chart серьёзности
 def create_bar_severity(df, highlight_municipality=None):
-    agg = df.sort_values("сумма_тяжести", ascending=False).head(10)
+    agg = df.sort_values("сумма_тяжести", ascending=False).head(10).copy()
+    severities = agg["средняя_тяжесть"].astype(float)
+    vmin, vmax = severities.min(), severities.max()
+
+    bar_colors = []
+    line_colors = []
+    line_widths = []
+    custom_severity = []
+    for _, row in agg.iterrows():
+        is_highlight = highlight_municipality and row["муниципалитет"] == highlight_municipality
+        if is_highlight:
+            bar_colors.append("gold")
+            line_colors.append("darkorange")
+            line_widths.append(2)
+        else:
+            color = _severity_bar_color(row["средняя_тяжесть"], vmin, vmax)
+            bar_colors.append(color)
+            line_colors.append(color)
+            line_widths.append(0)
+        custom_severity.append(row["средняя_тяжесть"])
+
+    fig = go.Figure(go.Bar(
+        x=agg["муниципалитет"],
+        y=agg["сумма_тяжести"],
+        text=agg["количество_проблем"],
+        textposition="outside",
+        texttemplate="%{text} обращений",
+        marker_color=bar_colors,
+        marker_line_color=line_colors,
+        marker_line_width=line_widths,
+        customdata=custom_severity,
+        hovertemplate="<b>%{x}</b><br>"
+                      "Сумма тяжести: %{y}<br>"
+                      "Количество проблем: %{text}<br>"
+                      "Средняя тяжесть: %{customdata:.2f}<extra></extra>",
+    ))
     
-    if highlight_municipality:
-        # Создаём колонку с цветами для каждого бара
-        agg["bar_color"] = agg.apply(
-            lambda x: "gold" if x["муниципалитет"] == highlight_municipality else x["средняя_тяжесть"],
-            axis=1
-        )
-        
-        # Создаём два отдельных графика: один для обычных, один для выделенного
-        fig = go.Figure()
-        
-        # Добавляем все бары, кроме выделенного
-        mask_not_highlight = agg["муниципалитет"] != highlight_municipality
-        if mask_not_highlight.any():
-            fig.add_trace(go.Bar(
-                x=agg[mask_not_highlight]["муниципалитет"],
-                y=agg[mask_not_highlight]["сумма_тяжести"],
-                text=agg[mask_not_highlight]["количество_проблем"],
-                textposition="outside",
-                marker_color=agg[mask_not_highlight]["средняя_тяжесть"],
-                marker_colorscale="Reds",
-                name="Другие муниципалитеты",
-                hovertemplate='<b>%{x}</b><br>'
-                              'Сумма тяжести: %{y}<br>'
-                              'Количество проблем: %{text}<br>'
-                              'Средняя тяжесть: %{marker.color:.2f}<extra></extra>'
-            ))
-        
-        # Добавляем выделенный бар отдельно (золотой)
-        mask_highlight = agg["муниципалитет"] == highlight_municipality
-        if mask_highlight.any():
-            highlight_data = agg[mask_highlight]
-            fig.add_trace(go.Bar(
-                x=highlight_data["муниципалитет"],
-                y=highlight_data["сумма_тяжести"],
-                text=highlight_data["количество_проблем"],
-                textposition="outside",
-                marker_color="gold",
-                name=f"{highlight_municipality} (выделен)",
-                marker_line_color="darkorange",
-                marker_line_width=2,
-                hovertemplate='<b>%{x}</b><br>'
-                              'Сумма тяжести: %{y}<br>'
-                              'Количество проблем: %{text}<br>'
-            ))
-        
-        fig.update_layout(barmode='group')
-        
-    else:
-        # Обычный px.bar
-        fig = px.bar(
-            agg,
-            x="муниципалитет",
-            y="сумма_тяжести",
-            color="средняя_тяжесть",
-            color_continuous_scale="Reds",
-            text="количество_проблем"
-        )
-        fig.update_traces(texttemplate="%{text} обращений", textposition="outside")
-    
-    fig.update_layout(**get_layout("ТОП-10 муниципалитетов: тяжесть"))
+    fig.update_layout(**get_layout("ТОП-10 муниципалитетов: тяжесть", MAP_ROW_HEIGHT))
     fig.update_xaxes(title_text="Муниципалитет")
     fig.update_yaxes(title_text="Сумма тяжести")
     

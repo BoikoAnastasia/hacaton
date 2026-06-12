@@ -1,2 +1,7 @@
+# ГородОК — настройки Streamlit (см. README.md, docs/ДАШБОРД.md)
+
 [server]
 maxUploadSize = 2048
+
+[browser]
+gatherUsageStats = false

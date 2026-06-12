@@ -1,8 +1,34 @@
-Сюда положите тестовый Excel для локального запуска пайплайна.
+Тестовые Excel для локального запуска
+=====================================
 
-Файлы .xlsx в эту папку не попадают в Git (могут быть большими).
-После клонирования репозитория скопируйте свой файл, например:
-  storage/samples/тестовый файл.xlsx
+Положите сюда файл .xlsx с обращениями граждан.
 
-Команда анализа:
-  .venv\Scripts\python.exe analyze\pipeline.py --input "storage\samples\ВАШ_ФАЙЛ.xlsx" --work-dir . --mode cluster --turbo
+Файлы .xlsx в Git не коммитятся (могут быть очень большими).
+
+Пример имени:
+  storage/samples/обращения_омск.xlsx
+
+Запуск дашборда
+---------------
+  run.bat
+  или:  run.ps1
+
+Обработка из командной строки (рекомендуемый режим)
+---------------------------------------------------
+  .venv\Scripts\python.exe analyze\pipeline.py ^
+    --input "storage\samples\ВАШ_ФАЙЛ.xlsx" ^
+    --work-dir . ^
+    --mode cluster --turbo
+
+Быстрый тест без GPU
+--------------------
+  .venv\Scripts\python.exe analyze\pipeline.py ^
+    --input "storage\samples\ВАШ_ФАЙЛ.xlsx" ^
+    --work-dir . ^
+    --mode fast ^
+    --limit 500
+
+Результаты появятся в:
+  storage\output\Отчет от дд.мм.гг - чч.мм\
+
+Подробнее: README.md и docs\РЕЖИМЫ_ОБРАБОТКИ.md

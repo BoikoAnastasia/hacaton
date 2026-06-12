@@ -1,9 +1,11 @@
 """
-Полный пайплайн хакатона:
-  1. excel.py  — очистка и фильтрация
-  2. cluster_analyze.py — кластерный LLM-анализ (рекомендуется)
-     test_qwen.py — полный LLM-анализ (медленно)
-  3. aggregate.py — Top-3 / Top-10 отчёт
+Полный пайплайн ГородОК:
+  1. excel.py           — очистка и фильтрация
+  2. анализ             — fast / cluster / llm / hybrid
+  3. aggregate.py       — Top-3 / Top-10, PDF, TXT-сводка
+  4. summarize_top.py   — LLM-описание топ-районов (только hybrid)
+
+Документация: docs/РЕЖИМЫ_ОБРАБОТКИ.md
 """
 
 import argparse

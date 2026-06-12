@@ -1,4 +1,12 @@
-"""Пересобрать dashboard из свежей папки хакатон (без затрагивания analyze/)."""
+"""
+Устаревшая утилита: копирование UI из соседней папки «хакатон».
+
+В актуальном репозитории дашборд уже в dashboard/. Используйте только
+если у вас есть отдельная папка с фронтендом для синхронизации.
+
+Обычный запуск проекта: setup.ps1 → run.ps1 (см. README.md).
+"""
+
 from __future__ import annotations
 
 import shutil
@@ -28,7 +36,7 @@ def main():
         elif src.exists():
             shutil.copy2(src, dst)
 
-    print("Скопирован UI из хакатон/. Заново примените pipeline_client.py и sidebar.py из репозитория.")
+    print("Скопирован UI из хакатон/. Проверьте pipeline_client.py и sidebar.py вручную.")
 
 
 if __name__ == "__main__":

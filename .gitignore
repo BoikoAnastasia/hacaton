@@ -18,6 +18,7 @@ dashboard/data/reports/*
 !dashboard/data/reports/.gitkeep
 storage/output/**
 !storage/output/.gitkeep
+!storage/output/README.txt
 
 # Большие Excel (тестовый файл — см. storage/samples/README.txt)
 storage/samples/*

@@ -20,27 +20,6 @@ section[data-testid="stSidebar"] {
   background-color: #0d1320;
 }
 
-.metric-card {
-  background: #111827;
-  border: 1px solid #1f2937;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 10px;
-}
-.metric-title {
-  color: #9ca3af;
-  font-size: 14px;
-}
-.metric-value {
-  font-size: 32px;
-  font-weight: bold;
-  color: white;
-}
-.metric-subtitle {
-  color: #9ca3af;
-  font-size: 13px;
-  margin-top: 4px;
-}
 .metric-growth {
   color: #22c55e;
 }
@@ -308,26 +287,37 @@ section[data-testid="stVerticalBlock"]:has([data-testid="stFileUploader"]) {
   cursor: not-allowed;
 }
   
-/* cards */
+/* KPI cards */
+
+.st-key-kpi_cards_row [data-testid="stHorizontalBlock"] {
+  align-items: stretch;
+}
 
 .metric-card {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  min-height: 118px;
+  box-sizing: border-box;
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 10px;
 }
 
 .metric-left {
-
+  flex-shrink: 0;
 }
 
 .metric-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 12px;
   background-color: var(--icon);
 }
@@ -335,18 +325,35 @@ section[data-testid="stVerticalBlock"]:has([data-testid="stFileUploader"]) {
 .metric-right {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
 }
 
-.metric-title, .metric-date{
+.metric-title,
+.metric-date {
   font-size: 14px;
   color: var(--grey);
+  line-height: 1.3;
 }
 
 .metric-value {
-  font-size: 18px;
+  font-size: 28px;
+  font-weight: 700;
   color: var(--white);
+  line-height: 1.2;
+  margin-top: 2px;
 }
-.metric-growth{
+
+.metric-subtitle {
+  color: #9ca3af;
+  font-size: 12px;
+  line-height: 1.3;
+  min-height: 16px;
+  margin-top: 4px;
+}
+
+.metric-growth {
   color: var(--green);
   font-size: 12px;
 }
@@ -359,12 +366,26 @@ section[data-testid="stVerticalBlock"]:has([data-testid="stFileUploader"]) {
 }
 
 /* Карта районов — фон как у metric-card */
-.st-key-omsk_choropleth_map [data-testid="stPlotlyChart"] {
+.st-key-omsk_choropleth_map [data-testid="stPlotlyChart"],
+.st-key-graphics_bar_severity [data-testid="stPlotlyChart"] {
   border: 1px solid #1f2937;
   border-radius: 16px;
   background: #111827;
   padding: 4px;
   min-height: 580px;
+}
+
+.st-key-graphics_top10_municipalities [data-testid="stPlotlyChart"],
+.st-key-graphics_top10_districts [data-testid="stPlotlyChart"],
+.st-key-graphics_municipality_chart [data-testid="stPlotlyChart"],
+.st-key-graphics_problem_pie [data-testid="stPlotlyChart"],
+.st-key-graphics_classification [data-testid="stPlotlyChart"],
+.st-key-graphics_dynamics [data-testid="stPlotlyChart"] {
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  background: #111827;
+  padding: 4px;
+  min-height: 420px;
 }
 
 .st-key-omsk_choropleth_map [data-testid="stPlotlyChart"] .js-plotly-plot,
