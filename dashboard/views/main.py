@@ -3,16 +3,15 @@ import streamlit as st
 from charts import (get_top3_districts)
 from analytics import (get_kpi_metrics, get_severity_stats)
 
-from components.downloads import columns_dowload_buttons
 from components.top3_districts import get_top3_districts
 from components.district_card import render_top_district_card
 from components.table import create_table
 from components.kpi import render_kpi_cards
+from components.section_load_reports import load_reports
+from components.cleaning_info import render_cleaning_info
 
 from core.data_loader import load_main_df
-from core.report_context import get_active_report_dir
 from utils.cleaning_stats import load_cleaning_stats
-from components.cleaning_info import render_cleaning_info
 
 def render_main():
     df = load_main_df()
@@ -30,11 +29,7 @@ def render_main():
         medium = severity["medium"]
         low = severity["low"]
 
-    st.subheader("Скачать отчёты")
-    active_dir = get_active_report_dir()
-    if active_dir:
-        st.caption(f"Папка: **{active_dir.name}**")
-    columns_dowload_buttons();
+    load_reports()
 
     st.subheader("Ключевые показатели")
 

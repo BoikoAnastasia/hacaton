@@ -2,11 +2,12 @@ import streamlit as st
 
 from core.report_context import get_active_report_dir
 from core.data_loader import load_main_df
-from utils.cleaning_stats import load_cleaning_stats
-from components.cleaning_info import render_cleaning_info
 from analytics import get_kpi_metrics
+from components.cleaning_info import render_cleaning_info
 from components.kpi import render_kpi_cards
 from components.table import create_table
+from components.section_load_reports import load_reports
+from utils.cleaning_stats import load_cleaning_stats
 from utils.summary_text import load_leadership_summary_text
 
 def render_reports():
@@ -16,6 +17,9 @@ def render_reports():
 
   if df is not None:
     kpi = get_kpi_metrics(df, load_cleaning_stats())
+
+  load_reports()
+
 
   st.subheader("Результат анализа")
 
