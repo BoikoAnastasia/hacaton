@@ -210,6 +210,20 @@ section[data-testid="stVerticalBlock"]:has([data-testid="stFileUploader"]) {
   overflow: hidden;
 }
 
+/* Карта районов — фон как у metric-card */
+.st-key-omsk_choropleth_map [data-testid="stPlotlyChart"] {
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  background: #111827;
+  padding: 4px;
+}
+
+.st-key-omsk_choropleth_map [data-testid="stPlotlyChart"] .js-plotly-plot,
+.st-key-omsk_choropleth_map [data-testid="stPlotlyChart"] .plot-container,
+.st-key-omsk_choropleth_map [data-testid="stPlotlyChart"] .svg-container {
+  background: #111827 !important;
+}
+
 [data-testid="stSelectbox"] {
   cursor: pointer;
 }

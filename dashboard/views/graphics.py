@@ -27,14 +27,19 @@ def render_graphics():
   col1, col2 = st.columns(2)
 
   with col1:
-    st.plotly_chart(
-      plot_omsk_choropleth(df),
-      use_container_width=True,
-      key="omsk_choropleth_map",
-      config={
-        "scrollZoom": True
-      }
-    )
+    if df is not None:
+      st.plotly_chart(
+        plot_omsk_choropleth(df),
+        use_container_width=True,
+        key="omsk_choropleth_map",
+        config={
+          "scrollZoom": True,
+          "displayModeBar": False,
+          "doubleClick": "reset",
+        },
+      )
+    else:
+      st.info("Карта появится после завершения анализа.")
     st.plotly_chart(
       plot_top_10(df10, "ТОП-10 проблемных муниципалитетов", "муниципалитет", "#EF4444"),
       use_container_width=True
