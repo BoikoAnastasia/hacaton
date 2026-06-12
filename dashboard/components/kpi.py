@@ -1,25 +1,21 @@
 import streamlit as st
 import base64
 
-
 def _format_metric(value):
-    if isinstance(value, float) and value != int(value):
-        return str(value)
-    if isinstance(value, (int, float)):
-        return f"{int(value):,}".replace(",", " ")
+  if isinstance(value, float) and value != int(value):
     return str(value)
-
+  if isinstance(value, (int, float)):
+    return f"{int(value):,}".replace(",", " ")
+  return str(value)
 
 def render_kpi_cards(kpi):
-  col1, col2, col3, col4 = st.columns(4)
-
+  col1, col2, col3, col4, col5 = st.columns(5)
   analyzed = kpi.get("analyzed", kpi["total"])
   total_subtitle = (
     f"Нерешённых к анализу: {_format_metric(analyzed)}"
     if analyzed != kpi["total"]
     else None
   )
-
   problem_subtitle = None
   if analyzed and kpi["problem_count"] != analyzed:
     share = round(kpi["problem_count"] / analyzed * 100, 1)
@@ -30,9 +26,10 @@ def render_kpi_cards(kpi):
     ("./assets/icons/alert-triangle.png", "Выявлено проблем", _format_metric(kpi["problem_count"]), problem_subtitle),
     ("./assets/icons/star.png", "Районов с проблемами", _format_metric(kpi["districts_with_problems"]), None),
     ("./assets/icons/apartment.png", "Средняя тяжесть", kpi["avg_severity"], None),
+    ("./assets/icons/flag-alt.png", "Главная тема", kpi["main_topic"], None),
   ]
 
-  for col, (icon, title, value, subtitle) in zip([col1, col2, col3, col4], cards):
+  for col, (icon, title, value, subtitle) in zip([col1, col2, col3, col4, col5], cards):
     with col:
       # Конвертируем изображение в base64 прямо здесь
       with open(icon, "rb") as img_file:

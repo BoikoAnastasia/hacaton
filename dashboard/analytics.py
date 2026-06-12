@@ -8,6 +8,12 @@ from utils.problem import is_problem
 def get_kpi_metrics(df, cleaning_stats: dict | None = None):
     analyzed = len(df)
     total_input = cleaning_stats["total_input"] if cleaning_stats else analyzed
+    main_topic = (
+        df["Группа тем"].mode()[0]
+        if "Группа тем" in df.columns
+        else "—"
+    )
+
 
     if "Проблема" in df.columns:
         problems = df[df["Проблема"].apply(is_problem)]
@@ -28,6 +34,7 @@ def get_kpi_metrics(df, cleaning_stats: dict | None = None):
         "districts_with_problems": districts_with_problems,
         "avg_severity": avg_severity,
         "cleaning_stats": cleaning_stats,
+        "main_topic": main_topic,
     }
 
 def get_severity_stats(df):

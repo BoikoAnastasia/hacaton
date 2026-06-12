@@ -24,27 +24,27 @@ def sidebar():
         with open("./assets/icons/file-report.png", "rb") as f:
             img_base64 = base64.b64encode(f.read()).decode()
         st.markdown(f"""
-          <div style="
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-          ">
-            <img
-              src="data:image/png;base64, {img_base64}"
-              width="45"
-              height="45"
-              >
             <div style="
-              font-size: 20px;
-              font-weight: 700;
-              color: white;
-              text-align: center;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 20px;
             ">
-              Аналитика обращений граждан
+                <img
+                src="data:image/png;base64, {img_base64}"
+                width="45"
+                height="45"
+                >
+                <div style="
+                font-size: 20px;
+                font-weight: 700;
+                color: white;
+                text-align: center;
+                ">
+                Аналитика обращений граждан
+                </div>
             </div>
-          </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
         nav_button("Главная", "main")
         nav_button("Анализ", "graphics")
@@ -55,9 +55,8 @@ def sidebar():
         render_report_history()
 
         st.divider()
-
         uploaded_file = st.file_uploader(
-            "Загрузить",
+            "Загрузите Excel файл",
             type=["xlsx"],
             key="upload_excel",
         )
