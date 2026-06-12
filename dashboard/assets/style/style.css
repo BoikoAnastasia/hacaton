@@ -256,8 +256,13 @@ section[data-testid="stVerticalBlock"]:has([data-testid="stFileUploader"]) {
 .st-key-run_analysis button {
   border: 1px solid var(--purple);
   color: var(--purple);
+  background: transparent;
 }
-
+.st-emotion-cache-1krtkoa {
+  color: var(--white);
+  border: none;
+  background: transparent;
+}
 .view-full-table-wrapper button {
   background-color: var(--button);
   width: 100%;

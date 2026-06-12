@@ -62,65 +62,107 @@ def _merge_all_municipalities(agg: pd.DataFrame, geojson: dict) -> pd.DataFrame:
 
 
 # Построение карты
-def plot_omsk_choropleth(df):
-  geojson_path = Path(__file__).resolve().parent.parent / "data" / "omsk.json"
-  geojson = load_geojson(geojson_path)
-  data = _merge_all_municipalities(prepare_data(df), geojson)
-
-  max_count = int(data["count"].max() or 1)
-
-  fig = px.choropleth(
-    data,
-    geojson=geojson,
-    locations="Муниципалитет",
-    featureidkey="properties.mun_name",
-    color="count",
-    color_continuous_scale=COUNT_SCALE,
-    range_color=[0, max_count],
-    hover_data={
-      "percent": True,
-      "severity": True,
-    },
-    labels={
-      "count": "Проблемных обращений",
-      "percent": "Доля от всех проблем (%)",
-      "severity": "Средняя тяжесть",
-      "Муниципалитет": "Район",
-    },
-  )
-
-  fig.update_layout(
-    height=580,
-    margin=dict(l=4, r=48, t=4, b=4),
-    dragmode="zoom",
-    paper_bgcolor=MAP_BG,
-    plot_bgcolor=MAP_BG,
-    font=dict(color="#e5e7eb"),
-    coloraxis_colorbar=dict(
-      title=dict(text="Проблем", font=dict(color="#e5e7eb")),
-      bgcolor=MAP_BG,
-      bordercolor=MAP_BORDER,
-      tickfont=dict(color="#9ca3af"),
-    ),
-  )
-
-  fig.update_geos(
-    fitbounds="locations",
-    domain=dict(x=[0.0, 0.88], y=[0.0, 1.0]),
-    visible=False,
-    bgcolor=MAP_BG,
-    landcolor=MAP_BG,
-    lakecolor=MAP_BG,
-    subunitcolor=MAP_BG,
-    countrycolor=MAP_BG,
-    coastlinecolor=MAP_BG,
-    projection_type="mercator",
-  )
-
-  fig.update_traces(
-    marker_line_color="#6b7280",
-    marker_line_width=0.5,
-    showlegend=False,
-  )
-
-  return fig
+def plot_omsk_choropleth(df, highlight_municipality=None):
+    geojson_path = Path(__file__).resolve().parent.parent / "data" / "omsk.json"
+    geojson = load_geojson(geojson_path)
+    data = _merge_all_municipalities(prepare_data(df), geojson)
+    
+    max_count = int(data["count"].max() or 1)
+    
+    # Если выбран конкретный муниципалитет
+    if highlight_municipality and highlight_municipality in data["Муниципалитет"].values:
+        # Создаём копию данных
+        data_display = data.copy()
+        
+        # Для всех районов, кроме выбранного, устанавливаем count = 0
+        mask = data_display["Муниципалитет"] != highlight_municipality
+        data_display.loc[mask, "count"] = 0
+        
+        # Для выбранного района оставляем его реальное значение
+        # Для 0 значений используем NO_DATA_COLOR через шкалу
+        fig = px.choropleth(
+            data_display,
+            geojson=geojson,
+            locations="Муниципалитет",
+            featureidkey="properties.mun_name",
+            color="count",
+            color_continuous_scale=COUNT_SCALE,
+            range_color=[0, max_count],
+            hover_data={
+                "percent": True,
+                "severity": True,
+            },
+            labels={
+                "count": "Проблемных обращений",
+                "percent": "Доля от всех проблем (%)",
+                "severity": "Средняя тяжесть",
+                "Муниципалитет": "Район",
+            },
+        )
+        
+        # Обновляем ховер
+        fig.update_traces(
+            hovertemplate=(
+                "<b>%{location}</b><br>" +
+                "Проблем: %{customdata[0]}<br>" +
+                "Доля: %{customdata[1]}%<br>" +
+                "Тяжесть: %{customdata[2]}<extra></extra>"
+            ),
+            customdata=data_display[["percent", "severity", "count"]].values
+        )
+    else:
+        # Обычный режим (показываем все районы)
+        fig = px.choropleth(
+            data,
+            geojson=geojson,
+            locations="Муниципалитет",
+            featureidkey="properties.mun_name",
+            color="count",
+            color_continuous_scale=COUNT_SCALE,
+            range_color=[0, max_count],
+            hover_data={
+                "percent": True,
+                "severity": True,
+            },
+            labels={
+                "count": "Проблемных обращений",
+                "percent": "Доля от всех проблем (%)",
+                "severity": "Средняя тяжесть",
+                "Муниципалитет": "Район",
+            },
+        )
+    
+    fig.update_layout(
+        height=580,
+        margin=dict(r=0, t=0, l=0, b=0),
+        dragmode="zoom",
+        paper_bgcolor=MAP_BG,
+        plot_bgcolor=MAP_BG,
+        font=dict(color="#e5e7eb"),
+        coloraxis_colorbar=dict(
+            title=dict(text="Проблем", font=dict(color="#e5e7eb")),
+            bgcolor=MAP_BG,
+            bordercolor=MAP_BORDER,
+            tickfont=dict(color="#9ca3af"),
+        ),
+    )
+    
+    fig.update_geos(
+        fitbounds="locations",
+        visible=False,
+        bgcolor=MAP_BG,
+        landcolor=MAP_BG,
+        lakecolor=MAP_BG,
+        subunitcolor=MAP_BG,
+        countrycolor=MAP_BG,
+        coastlinecolor=MAP_BG,
+        projection_type="mercator",
+    )
+    
+    fig.update_traces(
+        marker_line_color="#6b7280",
+        marker_line_width=0.5,
+        showlegend=False,
+    )
+    
+    return fig
